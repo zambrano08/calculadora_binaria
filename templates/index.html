@@ -14,7 +14,6 @@
             margin-top: 20px;
             overflow-x: auto;
         }
-
         .operacion-grid {
             display: grid;
             font-family: 'Courier New', Courier, monospace;
@@ -24,10 +23,8 @@
             margin: 0 auto;
             justify-items: center;
         }
-
         .bit { width: 35px; text-align: center; }
-        .acarreo { color: #ff4d4d; font-size: 1.1rem; }
-        
+        .paso-sup { color: #ff4d4d; font-size: 1.1rem; }
         .linea-resultado {
             grid-column: 1 / -1;
             width: 100%;
@@ -35,7 +32,6 @@
             background-color: #333;
             margin: 5px 0;
         }
-
         .signo { color: #555; width: 35px; text-align: center; }
     </style>
 </head>
@@ -45,27 +41,34 @@
         
         <div class="row justify-content-center">
             <div class="col-md-6">
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
                 <form method="POST" class="card p-4 shadow-sm">
                     <div class="mb-3">
-                        <label class="form-label">Primer número binario</label>
-                        <input type="text" name="num1" class="form-control" pattern="[01]+" placeholder="Ej: 1010" required>
+                        <label class="form-label">Primer número</label>
+                        <input type="text" name="num1" class="form-control" pattern="[01]+" placeholder="Ej: 1101" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Segundo número binario</label>
-                        <input type="text" name="num2" class="form-control" pattern="[01]+" placeholder="Ej: 1101" required>
+                        <label class="form-label">Segundo número</label>
+                        <input type="text" name="num2" class="form-control" pattern="[01]+" placeholder="Ej: 1010" required>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Calcular Suma</button>
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="submit" name="operacion" value="suma" class="btn btn-primary w-50">Sumar</button>
+                        <button type="submit" name="operacion" value="resta" class="btn btn-secondary w-50">Restar</button>
+                    </div>
                 </form>
 
                 {% if proc %}
                 <div class="card-cuaderno text-center">
-                    <h5 class="text-muted mb-4">Procedimiento:</h5>
-                        <div class="operacion-grid" data-cols="{{ proc.total_cols + 1 }}">
+                    <h5 class="text-muted mb-4">Procedimiento ({{ "Suma" if proc.signo == '+' else "Resta" }}):</h5>
+                    <div class="operacion-grid" data-cols="{{ proc.total_cols + 1 }}">
                         
-                        <!-- FILA ACARREOS (un espacio vacío para el signo) -->
+                        <!-- PASOS (ACARREOS O PRÉSTAMOS) -->
                         <div class="signo"></div>
-                        {% for bit in proc.bits_acarreos %}
-                            <div class="bit acarreo">{{ bit | safe }}</div>
+                        {% for bit in proc.pasos %}
+                            <div class="bit paso-sup">{{ bit | safe }}</div>
                         {% endfor %}
 
                         <!-- FILA A -->
@@ -74,18 +77,17 @@
                             <div class="bit">{{ bit }}</div>
                         {% endfor %}
 
-                        <!-- FILA B (Con el signo +) -->
-                        <div class="signo">+</div>
+                        <!-- FILA B -->
+                        <div class="signo">{{ proc.signo }}</div>
                         {% for bit in proc.bits_b %}
                             <div class="bit">{{ bit }}</div>
                         {% endfor %}
 
-                        <!-- LÍNEA -->
                         <div class="linea-resultado"></div>
 
                         <!-- RESULTADO -->
                         <div class="signo"></div>
-                        {% for bit in proc.bits_resultado %}
+                        {% for bit in proc.resultado %}
                             <div class="bit">{{ bit }}</div>
                         {% endfor %}
                     </div>
