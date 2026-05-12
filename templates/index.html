@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Binaria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .cuaderno {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5rem;
+            text-align: right;
+            display: inline-block;
+            border-bottom: 2px solid black;
+            padding-right: 10px;
+        }
+        .acarreo { color: red; font-size: 0.9rem; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <h2 class="text-center mb-4">Aritmética Binaria</h2>
+        <form method="POST" class="mb-4">
+            <input type="text" name="num1" class="form-control mb-2" placeholder="Primer número binario" required>
+            <input type="text" name="num2" class="form-control mb-2" placeholder="Segundo número binario" required>
+            <button type="submit" class="btn btn-primary w-100">Sumar</button>
+        </form>
+
+        {% if proc %}
+        <div class="card p-4 text-center">
+            <h5>Procedimiento:</h5>
+            <div class="cuaderno">
+                <div class="acarreo">{{ proc.acarreos }}</div>
+                <div>{{ proc.a }}</div>
+                <div>+ {{ proc.b }}</div>
+            </div>
+            <div style="font-family: 'Courier New'; font-size: 1.5rem; text-align: right; display: inline-block;">
+                {{ proc.resultado }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
