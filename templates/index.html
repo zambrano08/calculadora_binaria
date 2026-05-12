@@ -6,17 +6,9 @@
     <title>Calculadora Binaria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .card-cuaderno {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 2rem;
-            margin-top: 20px;
-            overflow-x: auto;
-        }
         .operacion-grid {
             display: grid;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Courier New', monospace;
             font-size: 1.8rem;
             font-weight: bold;
             width: fit-content;
@@ -25,71 +17,50 @@
         }
         .bit { width: 35px; text-align: center; }
         .paso-sup { color: #ff4d4d; font-size: 1.1rem; }
-        .linea-resultado {
-            grid-column: 1 / -1;
-            width: 100%;
-            height: 3px;
-            background-color: #333;
-            margin: 5px 0;
-        }
+        .linea { grid-column: 1 / -1; width: 100%; height: 3px; background: #333; margin: 5px 0; }
         .signo { color: #555; width: 35px; text-align: center; }
     </style>
 </head>
 <body class="bg-light">
     <div class="container py-5">
-        <h1 class="text-center mb-4">Aritmética Binaria</h1>
-        
         <div class="row justify-content-center">
             <div class="col-md-6">
-                {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-
-                <form method="POST" class="card p-4 shadow-sm">
-                    <div class="mb-3">
-                        <label class="form-label">Primer número</label>
-                        <input type="text" name="num1" class="form-control" pattern="[01]+" placeholder="Ej: 1101" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Segundo número</label>
-                        <input type="text" name="num2" class="form-control" pattern="[01]+" placeholder="Ej: 1010" required>
-                    </div>
-                    <div class="d-flex gap-2 mb-3">
-                        <button type="submit" name="operacion" value="suma" class="btn btn-primary w-50">Sumar</button>
-                        <button type="submit" name="operacion" value="resta" class="btn btn-secondary w-50">Restar</button>
+                <form method="POST" class="card p-4 shadow-sm mb-4">
+                    <input type="text" name="num1" class="form-control mb-2" pattern="[01]+" placeholder="Número A" required>
+                    <input type="text" name="num2" class="form-control mb-3" pattern="[01]+" placeholder="Número B" required>
+                    <div class="btn-group w-100">
+                        <button type="submit" name="operacion" value="suma" class="btn btn-outline-primary">Suma</button>
+                        <button type="submit" name="operacion" value="resta" class="btn btn-outline-primary">Resta</button>
+                        <button type="submit" name="operacion" value="multiplicacion" class="btn btn-primary">Multiplicar</button>
                     </div>
                 </form>
 
                 {% if proc %}
-                <div class="card-cuaderno text-center">
-                    <h5 class="text-muted mb-4">Procedimiento ({{ "Suma" if proc.signo == '+' else "Resta" }}):</h5>
+                <div class="card p-4">
                     <div class="operacion-grid" data-cols="{{ proc.total_cols + 1 }}">
-                        
-                        <!-- PASOS (ACARREOS O PRÉSTAMOS) -->
-                        <div class="signo"></div>
-                        {% for bit in proc.pasos %}
-                            <div class="bit paso-sup">{{ bit | safe }}</div>
-                        {% endfor %}
+                        {% if proc.tipo == 'std' %}
+                            <div class="signo"></div>
+                            {% for b in proc.pasos %}<div class="bit paso-sup">{{ b|safe }}</div>{% endfor %}
+                        {% endif %}
 
-                        <!-- FILA A -->
                         <div class="signo"></div>
-                        {% for bit in proc.bits_a %}
-                            <div class="bit">{{ bit }}</div>
-                        {% endfor %}
+                        {% for b in proc.bits_a %}<div class="bit">{{ b }}</div>{% endfor %}
 
-                        <!-- FILA B -->
                         <div class="signo">{{ proc.signo }}</div>
-                        {% for bit in proc.bits_b %}
-                            <div class="bit">{{ bit }}</div>
-                        {% endfor %}
+                        {% for b in proc.bits_b %}<div class="bit">{{ b }}</div>{% endfor %}
 
-                        <div class="linea-resultado"></div>
+                        <div class="linea"></div>
 
-                        <!-- RESULTADO -->
+                        {% if proc.tipo == 'mult' %}
+                            {% for fila in proc.productos_parciales %}
+                                <div class="signo"></div>
+                                {% for b in fila %}<div class="bit">{{ b if b != ' ' else '&nbsp;'|safe }}</div>{% endfor %}
+                            {% endfor %}
+                            <div class="linea"></div>
+                        {% endif %}
+
                         <div class="signo"></div>
-                        {% for bit in proc.resultado %}
-                            <div class="bit">{{ bit }}</div>
-                        {% endfor %}
+                        {% for b in proc.resultado %}<div class="bit">{{ b }}</div>{% endfor %}
                     </div>
                 </div>
                 {% endif %}
