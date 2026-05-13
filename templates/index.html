@@ -3,98 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Binaria Pro</title>
+    <title>Calculadora Binaria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: sans-serif; }
-        .operacion-grid {
-            display: grid;
-            font-family: 'Courier New', monospace;
-            font-size: 1.6rem;
-            font-weight: bold;
-            width: fit-content;
-            margin: 0 auto;
-            justify-items: center;
-            line-height: 1.2;
-        }
-        .bit { width: 30px; text-align: center; }
-        .paso-sup { color: #dc3545; font-size: 1rem; }
-        .linea { grid-column: 1 / -1; width: 100%; height: 3px; background: #333; margin: 5px 0; }
-        .signo { color: #6c757d; width: 30px; text-align: center; }
-        .card-cuaderno { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; overflow-x: auto; }
-        .div-container { font-family: 'Courier New', monospace; font-size: 1.4rem; display: inline-block; text-align: left; }
+        .mono { font-family: 'Courier New', monospace; font-weight: bold; }
+        .operacion-grid { display: grid; font-size: 1.5rem; width: fit-content; margin: 0 auto; justify-items: center; }
+        .bit { width: 25px; text-align: center; }
+        .paso-red { color: #dc3545; font-size: 0.9rem; }
+        .linea { grid-column: 1 / -1; width: 100%; height: 2px; background: #333; margin: 5px 0; }
+        .card-cuaderno { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow-x: auto; }
     </style>
 </head>
-<body>
+<body class="bg-light">
     <div class="container py-4">
-        <h2 class="text-center mb-4">Calculadora de Aritmética Binaria</h2>
-        
+        <h2 class="text-center mb-4">Calculadora Binaria</h2>
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
                 {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
-
                 <form method="POST" class="card p-3 shadow-sm mb-4">
-                    <div class="mb-3">
-                        <input type="text" name="num1" class="form-control form-control-lg" pattern="[01]+" placeholder="Número A" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="text" name="num2" class="form-control form-control-lg" pattern="[01]+" placeholder="Número B" required>
-                    </div>
-                    <div class="d-grid gap-2 d-md-flex">
-                        <button type="submit" name="operacion" value="suma" class="btn btn-outline-primary w-100">+ Suma</button>
-                        <button type="submit" name="operacion" value="resta" class="btn btn-outline-primary w-100">- Resta</button>
-                    </div>
-                    <div class="d-grid gap-2 d-md-flex mt-2">
-                        <button type="submit" name="operacion" value="multiplicacion" class="btn btn-outline-primary w-100">× Mult</button>
-                        <button type="submit" name="operacion" value="division" class="btn btn-outline-primary w-100">÷ Div</button>
+                    <input type="text" name="num1" class="form-control mb-2" pattern="[01]+" placeholder="Número A" required>
+                    <input type="text" name="num2" class="form-control mb-3" pattern="[01]+" placeholder="Número B" required>
+                    <div class="btn-group w-100">
+                        <button type="submit" name="operacion" value="suma" class="btn btn-outline-primary">+ Suma</button>
+                        <button type="submit" name="operacion" value="resta" class="btn btn-outline-primary">- Resta</button>
+                        <button type="submit" name="operacion" value="multiplicacion" class="btn btn-outline-primary">× Mult</button>
+                        <button type="submit" name="operacion" value="division" class="btn btn-primary">÷ Div</button>
                     </div>
                 </form>
 
                 {% if proc %}
-                <div class="card-cuaderno">
-                    <h5 class="text-muted text-center mb-4">Procedimiento Visual</h5>
-                    
+                <div class="card-cuaderno mono">
                     {% if proc.tipo == 'div' %}
-                        <div class="text-center">
-                            <div class="div-container">
-                                <div class="text-end text-primary mb-1"><small>Cociente:</small> {{ proc.cociente }}</div>
-                                <div class="d-flex align-items-end">
-                                    <div class="pe-2" style="border-right: 2px solid #333; border-bottom: 2px solid #333;">{{ proc.divisor }}</div>
-                                    <div class="ps-2" style="border-bottom: 2px solid #333;">{% for b in proc.dividendo %}{{ b }}{% endfor %}</div>
+                        <div class="text-center mb-3">
+                            <span class="text-muted text-uppercase">Cociente:</span> 
+                            <span class="text-primary h4">{{ proc.cociente }}</span>
+                        </div>
+                        <div class="border-start border-4 border-primary ps-3">
+                            <div class="mb-2">Divisor: {{ proc.divisor }} | Dividendo: {{ proc.dividendo }}</div>
+                            <hr>
+                            {% for p in proc.pasos %}
+                                <div class="mb-1">
+                                    <span class="text-muted">Bajando ({{ p.bajado }}):</span> 
+                                    <span>{{ p.residuo_previo }}{{ p.bajado }}</span>
+                                    {% if p.accion == 'resta' %}
+                                        <div class="text-danger ps-3">- {{ p.sustraendo }}</div>
+                                        <div class="ps-3 border-top w-50">= {{ p.resultado_resta }}</div>
+                                    {% else %}
+                                        <div class="text-muted small ps-3">(No alcanza)</div>
+                                    {% endif %}
                                 </div>
-                                <div class="ps-5 ms-3">
-                                    {% for p in proc.pasos %}
-                                        <div class="text-danger">- {{ p.sustraendo }}</div>
-                                        <div style="border-top: 1px solid #ddd; width: fit-content;">{{ p.residuo }}</div>
-                                    {% endfor %}
-                                    <div class="mt-2 text-success"><small>Residuo:</small> {{ proc.residuo_final }}</div>
-                                </div>
+                            {% endfor %}
+                            <div class="mt-3 pt-2 border-top text-success text-center">
+                                RESIDUO FINAL: {{ proc.residuo_final }}
                             </div>
                         </div>
                     {% else %}
                         <div class="operacion-grid" data-cols="{{ proc.total_cols + 1 }}">
                             {% if proc.tipo == 'std' %}
-                                <div class="signo"></div>
-                                {% for b in proc.pasos %}<div class="bit paso-sup">{{ b|safe }}</div>{% endfor %}
+                                <div class="bit"></div>
+                                {% for b in proc.pasos %}<div class="bit paso-red">{{ b|safe }}</div>{% endfor %}
                             {% endif %}
-
-                            <div class="signo"></div>
+                            <div class="bit"></div>
                             {% for b in proc.bits_a %}<div class="bit">{{ b }}</div>{% endfor %}
-
-                            <div class="signo">{{ proc.signo }}</div>
+                            <div class="bit text-muted">{{ proc.signo }}</div>
                             {% for b in proc.bits_b %}<div class="bit">{{ b }}</div>{% endfor %}
-
                             <div class="linea"></div>
-
                             {% if proc.tipo == 'mult' %}
-                                {% for fila in proc.productos_parciales %}
-                                    <div class="signo"></div>
+                                {% for fila in proc.productos %}
+                                    <div class="bit"></div>
                                     {% for b in fila %}<div class="bit">{{ b if b != ' ' else '&nbsp;'|safe }}</div>{% endfor %}
                                 {% endfor %}
                                 <div class="linea"></div>
                             {% endif %}
-
-                            <div class="signo"></div>
+                            <div class="bit"></div>
                             {% for b in proc.resultado %}<div class="bit text-primary">{{ b }}</div>{% endfor %}
                         </div>
                     {% endif %}
@@ -108,7 +89,7 @@
             document.querySelectorAll('.operacion-grid[data-cols]').forEach(function (grid) {
                 var cols = grid.getAttribute('data-cols');
                 if (cols) {
-                    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 30px)';
+                    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 25px)';
                 }
             });
         });
